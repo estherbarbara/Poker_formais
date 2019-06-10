@@ -2,14 +2,15 @@
  * Author: Esther
  */
 MACHINE Poker  
-SETS 
-	DECK = {ACE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGTH,NINE,TEN,JACK,QUEEN,KING};
-	SUITS = {SPADES, HEARTS, DIAMONDS, CLUBS};
-  	BOOLEAN = {YES, NO};
-	INGAME = {P_ONE, P_TWO}
+SETS
+  DECK = {ACE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGTH,NINE,TEN,JACK,QUEEN,KING};
+  SUITS = {SPADES, HEARTS, DIAMONDS, CLUBS};
+  BOOLEAN = {YES, NO};
+  INGAME = {P_ONE, P_TWO}
 
-VARIABLES         
-    playable_deck, comunity_cards, player_one_cards, player_two_cards, royal_flush, pool, playerOneTurn, playersInGame, gambleTime
+VARIABLES
+    playable_deck, comunity_cards, player_one_cards, player_two_cards, royal_flush, 
+    playersInGame, gambleTime
     
 INVARIANT         
     playable_deck <: DECK*SUITS
@@ -27,26 +28,23 @@ INVARIANT
     & card( player_one_cards /\ player_two_cards ) = 0
     & ( card( playable_deck ) + card( comunity_cards ) + card( player_one_cards ) + card( player_two_cards ) )=52
     & royal_flush <: DECK
-    & pool : NAT
-    & playerOneTurn : BOOLEAN
     & gambleTime : BOOLEAN
     & playersInGame <: INGAME
 
 INITIALISATION 
-	playable_deck := DECK*SUITS || 
-	comunity_cards :={} || 
-	player_one_cards :={} || 
-	player_two_cards :={} ||
-	royal_flush := {ACE,TEN,JACK,QUEEN,KING} ||
-	pool := 0 ||
-	playerOneTurn := YES ||
-    	playersInGame := {P_ONE, P_TWO} ||
-	gambleTime := NO
+  playable_deck := DECK*SUITS || 
+  comunity_cards :={} || 
+  player_one_cards :={} || 
+  player_two_cards :={} ||
+  royal_flush := {ACE,TEN,JACK,QUEEN,KING} ||
+  gambleTime := NO ||
+  playersInGame := {P_ONE, P_TWO}
 	
 OPERATIONS
+
+/****** dealer ******/
   aa, bb, cc <-- deal_comunity_cards =
-  PRE gambleTime = NO & 
-    card( playable_deck ) > 3 & card( comunity_cards ) = 0
+  PRE gambleTime = NO & card( playable_deck ) > 3 & card( comunity_cards ) = 0
   THEN
       	ANY xx, yy, zz
       	WHERE xx:DECK*SUITS & yy:DECK*SUITS & zz:DECK*SUITS & 
@@ -77,9 +75,9 @@ OPERATIONS
 
   aa <-- deal_one_comunity_card =
   PRE gambleTime = NO & 
-    card(comunity_cards) >=3 & card(comunity_cards) <= 4 & 
-    card( player_one_cards ) > 0 & card( player_two_cards ) > 0 & 
-    card(playable_deck) >= 1
+	card(comunity_cards) >=3 & card(comunity_cards) <= 4 & 
+	card( player_one_cards ) > 0 & card( player_two_cards ) > 0 & 
+	card(playable_deck) >= 1
   THEN 
       ANY xx
       WHERE xx:DECK*SUITS & {xx} <: playable_deck
@@ -117,7 +115,76 @@ OPERATIONS
       END ||
       gambleTime := YES
   END;
+/****** end dealer ******/
 
+
+/****** combos ******/
+  	ww <-- royal_flush_winner =
+  	PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
+  	THEN 
+  		IF  
+      		royal_flush *{SPADES} <: player_one_cards \/ comunity_cards  or
+    		royal_flush *{HEARTS} <: player_one_cards \/ comunity_cards or
+    		royal_flush *{DIAMONDS} <: player_one_cards \/ comunity_cards or
+    		royal_flush *{CLUBS} <: player_one_cards \/ comunity_cards
+  		THEN
+  			ww:="PLAYER ONE"
+  		ELSE
+  			IF 
+       			 royal_flush *{SPADES} <: player_two_cards \/ comunity_cards or
+    			royal_flush *{HEARTS} <: player_two_cards \/ comunity_cards  or
+    			royal_flush *{DIAMONDS} <: player_two_cards \/ comunity_cards  or
+    			royal_flush *{CLUBS} <: player_two_cards \/ comunity_cards 
+			THEN
+				ww:="PLAYER TWO"
+			ELSE
+				ww:="DUMMY"
+			END
+		END
+  END;
+
+	ww <-- quadra_winner =
+		PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
+		THEN 
+			IF 
+				{ACE} *SUITS <: player_one_cards \/ comunity_cards or
+				{TWO } *SUITS <: player_one_cards \/ comunity_cards or
+				{THREE} *SUITS <: player_one_cards \/ comunity_cards or
+				{FOUR} *SUITS <: player_one_cards \/ comunity_cards  or
+				{FIVE} * SUITS <: player_one_cards \/ comunity_cards or
+				{SIX} *SUITS <: player_one_cards \/ comunity_cards or
+				{EIGTH} * SUITS <: player_one_cards \/ comunity_cards or
+				{NINE} * SUITS <: player_one_cards \/ comunity_cards or
+				{TEN} * SUITS <: player_one_cards \/ comunity_cards or
+				{JACK} * SUITS <: player_one_cards \/ comunity_cards or
+				{QUEEN} * SUITS <: player_one_cards \/ comunity_cards or
+				{KING} * SUITS <: player_one_cards \/ comunity_cards
+			THEN
+				ww:="PLAYER ONE"
+			ELSE
+				IF 
+					{ACE} *SUITS <: player_two_cards \/ comunity_cards or
+					{TWO } *SUITS <: player_two_cards \/ comunity_cards  or
+					{THREE} *SUITS <: player_two_cards \/ comunity_cards  or
+					{FOUR} *SUITS <: player_two_cards \/ comunity_cards   or
+					{FIVE} * SUITS <: player_two_cards \/ comunity_cards  or
+					{SIX} *SUITS <: player_two_cards \/ comunity_cards  or
+					{EIGTH} * SUITS <: player_two_cards \/ comunity_cards  or
+					{NINE} * SUITS <: player_two_cards \/ comunity_cards  or
+					{TEN} * SUITS <: player_two_cards \/ comunity_cards  or
+					{JACK} * SUITS <: player_two_cards \/ comunity_cards  or
+					{QUEEN} * SUITS <: player_two_cards \/ comunity_cards  or
+					{KING} * SUITS <: player_two_cards \/ comunity_cards 
+				THEN
+					ww:="PLAYER TWO"
+				ELSE
+					ww:="DUMMY"
+			END
+		END
+	END;
+/****** end combos ******/
+
+/****** values ******/
   aa <-- cardinalidade_deck = 
     aa := card( playable_deck );
 
@@ -128,107 +195,8 @@ OPERATIONS
     aa := card( player_one_cards );
 
   aa <-- cardinalidade_player_two = 
-    aa := card( player_two_cards );
+    aa := card( player_two_cards )
 
-  player_one_gamble(vv) =
-  PRE vv:NAT & gambleTime = YES & playerOneTurn = YES & {P_ONE} <: playersInGame
-  THEN
-      pool := pool + vv ||
-      playerOneTurn := NO
-  END;
+/****** end values ******/
 
-  player_one_quit_game =
-  PRE playerOneTurn = YES & gambleTime = YES & {P_ONE} <: playersInGame
-  THEN
-     playersInGame := playersInGame - {P_ONE} ||
-     playerOneTurn := NO ||
-     gambleTime := NO
-  END;
-
-  player_two_gamble(vv) =
-  PRE vv:NAT & gambleTime = YES & playerOneTurn = NO & {P_TWO} <: playersInGame
-  THEN
-      pool := pool + vv ||
-      playerOneTurn := YES
-  END;
-
-  player_two_quit_game =
-  PRE gambleTime = YES & playerOneTurn = NO & {P_TWO} <: playersInGame
-  THEN
-     playersInGame := playersInGame - {P_TWO} ||
-     playerOneTurn := YES ||
-     gambleTime := NO
-  END;
-
-  end_gamble_time =
-  PRE gambleTime = YES
-  THEN
-     gambleTime := NO
-  END;
-  
-
-  ww <-- royal_flush_winner =
-  PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
-  THEN 
-  	IF  
-      royal_flush *{SPADES} <: player_one_cards \/ comunity_cards  or
-    	royal_flush *{HEARTS} <: player_one_cards \/ comunity_cards or
-    	royal_flush *{DIAMONDS} <: player_one_cards \/ comunity_cards or
-    	royal_flush *{CLUBS} <: player_one_cards \/ comunity_cards
-  	THEN
-  		ww:="PLAYER ONE"
-  	ELSE
-  		IF 
-        royal_flush *{SPADES} <: player_two_cards \/ comunity_cards or
-    		royal_flush *{HEARTS} <: player_two_cards \/ comunity_cards  or
-    		royal_flush *{DIAMONDS} <: player_two_cards \/ comunity_cards  or
-    		royal_flush *{CLUBS} <: player_two_cards \/ comunity_cards 
-		THEN
-			ww:="PLAYER TWO"
-		ELSE
-			ww:="DUMMY"
-		END
-	END
-  END;
-
-  ww <-- quadra_winner =
-  PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
-  THEN 
-	IF 
-    {ACE} *SUITS <: player_one_cards \/ comunity_cards or
-		{TWO } *SUITS <: player_one_cards \/ comunity_cards or
-		{THREE} *SUITS <: player_one_cards \/ comunity_cards or
-		{FOUR} *SUITS <: player_one_cards \/ comunity_cards  or
-		{FIVE} * SUITS <: player_one_cards \/ comunity_cards or
-		{SIX} *SUITS <: player_one_cards \/ comunity_cards or
-		{EIGTH} * SUITS <: player_one_cards \/ comunity_cards or
-		{NINE} * SUITS <: player_one_cards \/ comunity_cards or
-		{TEN} * SUITS <: player_one_cards \/ comunity_cards or
-		{JACK} * SUITS <: player_one_cards \/ comunity_cards or
-		{QUEEN} * SUITS <: player_one_cards \/ comunity_cards or
-		{KING} * SUITS <: player_one_cards \/ comunity_cards
-	THEN
-		ww:="PLAYER ONE"
-	ELSE
-		IF 
-      {ACE} *SUITS <: player_two_cards \/ comunity_cards or
-  		{TWO } *SUITS <: player_two_cards \/ comunity_cards  or
-  		{THREE} *SUITS <: player_two_cards \/ comunity_cards  or
-  		{FOUR} *SUITS <: player_two_cards \/ comunity_cards   or
-  		{FIVE} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{SIX} *SUITS <: player_two_cards \/ comunity_cards  or
-  		{EIGTH} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{NINE} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{TEN} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{JACK} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{QUEEN} * SUITS <: player_two_cards \/ comunity_cards  or
-  		{KING} * SUITS <: player_two_cards \/ comunity_cards 
-		THEN
-			ww:="PLAYER TWO"
-		ELSE
-			ww:="DUMMY"
-		END
-	END
-  END
-	
 END
