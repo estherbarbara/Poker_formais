@@ -2,18 +2,16 @@
  * Author: Esther
  */
 MACHINE Gambler  
-SETS 
-  	BOOLEAN = {YES, NO};
-	INGAME = {P_ONE, P_TWO}
+INCLUDES PokerCtx
+PROMOTES stopGambleTime, startGambleTime
 
 VARIABLES 
-    playerOneTurn, playersInGame, gambleTime, 
+    playerOneTurn, playersInGame, 
     pool, first_player_raised_bet, bet_value_player_one, bet_value_player_two, actual_bet, first_round,
     first_player_money, second_player_money
     
 INVARIANT
     playerOneTurn : BOOLEAN
-    & gambleTime : BOOLEAN
     & first_round : BOOLEAN
     & playersInGame <: INGAME
     & pool : NAT
@@ -27,7 +25,6 @@ INVARIANT
 INITIALISATION 
 	playerOneTurn := YES ||
 	playersInGame := {P_ONE, P_TWO} ||
-	gambleTime := YES ||
 	pool := 0 ||
 	first_player_raised_bet := NO ||
 	bet_value_player_one := 0 ||
@@ -45,12 +42,12 @@ OPERATIONS
   	pool := pool + actual_bet ||
   	IF playerOneTurn = YES
   	THEN
-		first_player_money := first_player_money - actual_bet ||
-		bet_value_player_one := bet_value_player_one + actual_bet ||
+		    first_player_money := first_player_money - actual_bet ||
+		    bet_value_player_one := bet_value_player_one + actual_bet ||
     		playerOneTurn := NO
-	ELSE
-		second_player_money := second_player_money - actual_bet ||
-		bet_value_player_two := bet_value_player_two + actual_bet ||
+	  ELSE
+		    second_player_money := second_player_money - actual_bet ||
+		    bet_value_player_two := bet_value_player_two + actual_bet ||
 	    	playerOneTurn := YES
 	END ||
 	first_round := NO
@@ -71,7 +68,7 @@ OPERATIONS
         bet_value_player_two := bet_value_player_one ||
         playerOneTurn := YES
     END ||
-    gambleTime := NO ||
+    stopGambleTime ||
     first_round := NO
   END;
 
@@ -100,11 +97,11 @@ OPERATIONS
 	THEN 
 		playersInGame := playersInGame - {P_ONE} ||
 		playerOneTurn := NO ||
-		gambleTime := NO
+		stopGambleTime
 	ELSE
 		playersInGame := playersInGame - {P_TWO} ||
 		playerOneTurn := YES ||
-		gambleTime := NO
+		stopGambleTime
 	END
   END
 
