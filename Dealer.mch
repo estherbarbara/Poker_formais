@@ -2,8 +2,7 @@
  * Author: Esther
  */
 MACHINE Dealer
-INCLUDES PokerCtx
-PROMOTES stopGambleTime, startGambleTime
+EXTENDS Gambler
 
 SETS
     DECK = {ACE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGTH,NINE,TEN,JACK,QUEEN,KING};
@@ -74,7 +73,9 @@ OPERATIONS
       THEN playable_deck := playable_deck - {xx} ||
           comunity_cards := comunity_cards \/ {xx}
       END ||
-      startGambleTime
+      IF card(comunity_cards) = 3 //Theres still one gambling round left
+      THEN startGambleTime
+      END
   END;
   
   /*
@@ -105,7 +106,7 @@ OPERATIONS
 
 /****** combos ******/
   	ww <-- royal_flush_winner =
-  	PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
+  	PRE ww:INGAME & card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
   	THEN 
   		IF  
       		royal_flush *{SPADES} <: player_one_cards \/ comunity_cards  or
@@ -113,7 +114,7 @@ OPERATIONS
     		royal_flush *{DIAMONDS} <: player_one_cards \/ comunity_cards or
     		royal_flush *{CLUBS} <: player_one_cards \/ comunity_cards
   		THEN
-  			ww:="PLAYER ONE"
+  			ww:=P_ONE
   		ELSE
   			IF 
        			 royal_flush *{SPADES} <: player_two_cards \/ comunity_cards or
@@ -121,15 +122,15 @@ OPERATIONS
     			royal_flush *{DIAMONDS} <: player_two_cards \/ comunity_cards  or
     			royal_flush *{CLUBS} <: player_two_cards \/ comunity_cards 
 			THEN
-				ww:="PLAYER TWO"
+				ww:=P_TWO
 			ELSE
-				ww:="DUMMY"
+				ww:=P_NONE
 			END
 		END
   END;
 
 	ww <-- quadra_winner =
-		PRE card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
+		PRE ww:INGAME & card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
 		THEN 
 			IF 
 				{ACE} *SUITS <: player_one_cards \/ comunity_cards or
@@ -145,7 +146,7 @@ OPERATIONS
 				{QUEEN} * SUITS <: player_one_cards \/ comunity_cards or
 				{KING} * SUITS <: player_one_cards \/ comunity_cards
 			THEN
-				ww:="PLAYER ONE"
+				ww:=P_ONE
 			ELSE
 				IF 
 					{ACE} *SUITS <: player_two_cards \/ comunity_cards or
@@ -161,15 +162,16 @@ OPERATIONS
 					{QUEEN} * SUITS <: player_two_cards \/ comunity_cards  or
 					{KING} * SUITS <: player_two_cards \/ comunity_cards 
 				THEN
-					ww:="PLAYER TWO"
+					ww:=P_TWO
 				ELSE
-					ww:="DUMMY"
+					ww:=P_NONE
 			END
 		END
-	END;
+	END
 /****** end combos ******/
 
 /****** values ******/
+/*
   aa <-- cardinalidade_deck = 
     aa := card( playable_deck );
 
@@ -181,7 +183,7 @@ OPERATIONS
 
   aa <-- cardinalidade_player_two = 
     aa := card( player_two_cards )
-
+*/
 /****** end values ******/
 
 END

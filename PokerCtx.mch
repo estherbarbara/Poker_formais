@@ -1,10 +1,10 @@
-/* Types
+/* PokerCtx
  * Author: Esther
  */
 MACHINE PokerCtx  
 SETS
     BOOLEAN = {YES, NO};
-    INGAME = {P_ONE, P_TWO}
+    INGAME = {P_ONE, P_TWO, P_NONE}
 
 VARIABLES
     gambleTime

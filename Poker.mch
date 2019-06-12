@@ -2,7 +2,7 @@
  * Author: Esther
  */
 MACHINE Poker
-EXTENDS Dealer, Gambler
+EXTENDS Dealer
 
 OPERATIONS
 

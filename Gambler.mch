@@ -69,11 +69,12 @@ OPERATIONS
         playerOneTurn := YES
     END ||
     stopGambleTime ||
-    first_round := NO
+    first_round := YES
+
   END;
 
   player_raise_bet = 
-  PRE gambleTime = YES & card(playersInGame) > 1 & first_round = NO
+  PRE first_round = NO & gambleTime = YES & card(playersInGame) > 1
   THEN
   	actual_bet := actual_bet + 5 ||
   	IF playerOneTurn = YES
@@ -81,12 +82,12 @@ OPERATIONS
 		first_player_money := first_player_money - actual_bet ||
   		first_player_raised_bet := YES ||
 		bet_value_player_one := bet_value_player_one + actual_bet ||
-	    	playerOneTurn := NO
+	    playerOneTurn := NO
 	ELSE
 		second_player_money := second_player_money - actual_bet ||
   		first_player_raised_bet := NO ||
 		bet_value_player_two := bet_value_player_two + actual_bet ||
-	    	playerOneTurn := YES
+	    playerOneTurn := YES
 	END
   END;
 
@@ -102,7 +103,8 @@ OPERATIONS
 		playersInGame := playersInGame - {P_TWO} ||
 		playerOneTurn := YES ||
 		stopGambleTime
-	END
+	END ||
+    first_round := YES
   END
 
 END
