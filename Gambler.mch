@@ -21,6 +21,9 @@ INVARIANT
     & actual_bet : NAT
     & first_player_money : INT
     & second_player_money : INT
+    & first_player_raised_bet + bet_value_player_one := 100
+    & second_player_money + bet_value_player_two := 100
+
 
 INITIALISATION 
 	playerOneTurn := YES ||
@@ -31,8 +34,8 @@ INITIALISATION
 	bet_value_player_two := 0 ||
 	actual_bet := 5 ||
 	first_round := YES ||
-	first_player_money := 40 ||
-	second_player_money := 40
+	first_player_money := 100 ||
+	second_player_money := 100
 	
 OPERATIONS
 
