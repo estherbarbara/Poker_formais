@@ -2,8 +2,7 @@
  * Author: Esther
  */
 MACHINE Gambler  
-INCLUDES PokerCtx
-PROMOTES stopGambleTime, startGambleTime
+EXTENDS PokerCtx
 
 VARIABLES 
     playerOneTurn, playersInGame, 
@@ -40,7 +39,7 @@ INITIALISATION
 OPERATIONS
 
   first_gamble =
-  PRE first_round = YES & gambleTime = YES & card(playersInGame) > 1
+  PRE first_round = YES & gambleTime = YES & gameFinished = NO &  card(playersInGame) > 1
   THEN
   	pool := pool + actual_bet ||
   	IF playerOneTurn = YES
@@ -57,7 +56,7 @@ OPERATIONS
   END;
 
   cover_bet =
-  PRE first_round = NO & gambleTime = YES & card(playersInGame) > 1
+  PRE first_round = NO & gambleTime = YES & gameFinished = NO &  card(playersInGame) > 1
   THEN
     IF playerOneTurn = YES
     THEN
@@ -77,7 +76,7 @@ OPERATIONS
   END;
 
   player_raise_bet = 
-  PRE first_round = NO & gambleTime = YES & card(playersInGame) > 1
+  PRE first_round = NO & gambleTime = YES & gameFinished = NO  & card(playersInGame) > 1
   THEN
   	actual_bet := actual_bet + 5 ||
   	pool := pool + actual_bet + 5 ||
@@ -96,7 +95,7 @@ OPERATIONS
   END;
 
   player_quit_game =
-  PRE gambleTime = YES & card(playersInGame) > 1 & {P_ONE} <: playersInGame
+  PRE gambleTime = YES & gameFinished = NO & card(playersInGame) > 1 & {P_ONE} <: playersInGame
   THEN
 	IF playerOneTurn = YES
 	THEN 
@@ -106,7 +105,7 @@ OPERATIONS
 		pool := 0 ||
 		playersInGame := playersInGame - {P_ONE} ||
 		playerOneTurn := NO ||
-		stopGambleTime
+		finishGame
 	ELSE
 		first_player_money := first_player_money + pool ||
 		bet_value_player_one := 0 ||
@@ -114,28 +113,34 @@ OPERATIONS
 		pool := 0 ||
 		playersInGame := playersInGame - {P_TWO} ||
 		playerOneTurn := YES ||
-		stopGambleTime
+		finishGame
 	END ||
     first_round := YES
   END;
   
   player_one_win_game =
-  PRE gambleTime = YES & card(playersInGame) > 1 & {P_ONE} <: playersInGame
+  PRE gameFinished = NO & card(playersInGame) > 1 & {P_ONE} <: playersInGame
   THEN
 		playersInGame := playersInGame - {P_ONE} ||
+		first_player_money := first_player_money + pool ||
+		bet_value_player_one := 0 ||
+		bet_value_player_two := 0 ||
 		playerOneTurn := NO ||
 		pool := 0 ||
-		stopGambleTime ||
+		finishGame ||
 		first_round := YES
   END;
   
   player_two_win_game =
-  PRE gambleTime = YES & card(playersInGame) > 1 & {P_TWO} <: playersInGame
+  PRE gameFinished = NO & card(playersInGame) > 1 & {P_TWO} <: playersInGame
   THEN
 		playersInGame := playersInGame - {P_ONE} ||
+		second_player_money := second_player_money + pool ||
+		bet_value_player_one := 0 ||
+		bet_value_player_two := 0 ||
 		playerOneTurn := NO ||
 		pool := 0 ||
-		stopGambleTime ||
+		finishGame ||
 		first_round := YES
   END
 
