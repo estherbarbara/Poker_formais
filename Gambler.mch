@@ -21,8 +21,8 @@ INVARIANT
     & actual_bet : NAT
     & first_player_money : INT
     & second_player_money : INT
-    & first_player_raised_bet + bet_value_player_one := 100
-    & second_player_money + bet_value_player_two := 100
+    & pool = bet_value_player_one + bet_value_player_two 
+    & first_player_money + bet_value_player_one + second_player_money + bet_value_player_two = 200
 
 
 INITIALISATION 
@@ -40,7 +40,7 @@ INITIALISATION
 OPERATIONS
 
   first_gamble =
-  PRE first_round = YES & gambleTime = YES & card(playersInGame) = 2
+  PRE first_round = YES & gambleTime = YES & card(playersInGame) > 1
   THEN
   	pool := pool + actual_bet ||
   	IF playerOneTurn = YES
@@ -57,18 +57,18 @@ OPERATIONS
   END;
 
   cover_bet =
-  PRE first_round = NO & gambleTime = YES & card(playersInGame) = 2
+  PRE first_round = NO & gambleTime = YES & card(playersInGame) > 1
   THEN
     IF playerOneTurn = YES
     THEN
         pool := pool + bet_value_player_two - bet_value_player_one ||
-        first_player_money := first_player_money - bet_value_player_two - bet_value_player_one ||
-        bet_value_player_one := bet_value_player_two ||
+        first_player_money := first_player_money -  (bet_value_player_two - bet_value_player_one) ||
+        bet_value_player_one := bet_value_player_one + (bet_value_player_two - bet_value_player_one) ||
         playerOneTurn := NO
     ELSE
         pool := pool + bet_value_player_one - bet_value_player_two ||
-        first_player_money := first_player_money - bet_value_player_one - bet_value_player_two ||
-        bet_value_player_two := bet_value_player_one ||
+        second_player_money := second_player_money - (bet_value_player_one - bet_value_player_two) ||
+        bet_value_player_two := bet_value_player_two + (bet_value_player_one - bet_value_player_two) ||
         playerOneTurn := YES
     END ||
     stopGambleTime ||
@@ -80,34 +80,63 @@ OPERATIONS
   PRE first_round = NO & gambleTime = YES & card(playersInGame) > 1
   THEN
   	actual_bet := actual_bet + 5 ||
+  	pool := pool + actual_bet + 5 ||
   	IF playerOneTurn = YES
   	THEN
-		first_player_money := first_player_money - actual_bet ||
+		first_player_money := first_player_money - (actual_bet +5) ||
   		first_player_raised_bet := YES ||
-		bet_value_player_one := bet_value_player_one + actual_bet ||
+		bet_value_player_one := bet_value_player_one + actual_bet + 5 ||
 	    playerOneTurn := NO
 	ELSE
-		second_player_money := second_player_money - actual_bet ||
+		second_player_money := second_player_money - (actual_bet + 5) ||
   		first_player_raised_bet := NO ||
-		bet_value_player_two := bet_value_player_two + actual_bet ||
+		bet_value_player_two := bet_value_player_two + actual_bet + 5 ||
 	    playerOneTurn := YES
 	END
   END;
 
   player_quit_game =
-  PRE gambleTime = YES & {P_ONE} <: playersInGame
+  PRE gambleTime = YES & card(playersInGame) > 1 & {P_ONE} <: playersInGame
   THEN
 	IF playerOneTurn = YES
 	THEN 
+		second_player_money := second_player_money + pool ||
+		bet_value_player_one := 0 ||
+		bet_value_player_two := 0 ||
+		pool := 0 ||
 		playersInGame := playersInGame - {P_ONE} ||
 		playerOneTurn := NO ||
 		stopGambleTime
 	ELSE
+		first_player_money := first_player_money + pool ||
+		bet_value_player_one := 0 ||
+		bet_value_player_two := 0 ||
+		pool := 0 ||
 		playersInGame := playersInGame - {P_TWO} ||
 		playerOneTurn := YES ||
 		stopGambleTime
 	END ||
     first_round := YES
+  END;
+  
+  player_one_win_game =
+  PRE gambleTime = YES & card(playersInGame) > 1 & {P_ONE} <: playersInGame
+  THEN
+		playersInGame := playersInGame - {P_ONE} ||
+		playerOneTurn := NO ||
+		pool := 0 ||
+		stopGambleTime ||
+		first_round := YES
+  END;
+  
+  player_two_win_game =
+  PRE gambleTime = YES & card(playersInGame) > 1 & {P_TWO} <: playersInGame
+  THEN
+		playersInGame := playersInGame - {P_ONE} ||
+		playerOneTurn := NO ||
+		pool := 0 ||
+		stopGambleTime ||
+		first_round := YES
   END
 
 END
