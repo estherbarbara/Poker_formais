@@ -4,10 +4,6 @@
 MACHINE Dealer
 EXTENDS Gambler
 
-SETS
-    DECK = {ACE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGTH,NINE,TEN,JACK,QUEEN,KING};
-    SUITS = {SPADES, HEARTS, DIAMONDS, CLUBS}
-
 VARIABLES
     playable_deck, comunity_cards, player_one_cards, player_two_cards, royal_flush
     

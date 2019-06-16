@@ -2,7 +2,7 @@
  * Author: Esther
  */
 MACHINE Gambler  
-EXTENDS PokerCtx
+EXTENDS Rounds
 
 VARIABLES 
     playerOneTurn, playersInGame, 
