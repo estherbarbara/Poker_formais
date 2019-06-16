@@ -22,7 +22,7 @@ INITIALISATION
 	bet_value_player_two := 0;
 	actual_bet := 5;
 	first_round := YES;
-	first_player_money := 100 ;
+	first_player_money := 100;
 	second_player_money := 100;
 	
 
@@ -34,11 +34,11 @@ OPERATIONS
       	THEN
     		    first_player_money := first_player_money - actual_bet;
     		    bet_value_player_one := bet_value_player_one + actual_bet;
-        		playerOneTurn := NO
+        		playerOneTurn := NO;
     	  ELSE
     		    second_player_money := second_player_money - actual_bet;
     		    bet_value_player_two := bet_value_player_two + actual_bet;
-    	    	playerOneTurn := YES
+    	    	playerOneTurn := YES;
     	END;
     	first_round := NO;
 	END;
@@ -59,7 +59,7 @@ OPERATIONS
         playerOneTurn := YES;
     END;
     stopGambleTime;
-    first_round := YES
+    first_round := YES;
 
   END;
 
@@ -101,9 +101,9 @@ OPERATIONS
 		pool := 0;
 		playersInGame := playersInGame - {P_TWO};
 		playerOneTurn := YES;
-		finishGame
+		finishGame;
 	END;
-    first_round := YES
+    first_round := YES;
   END;
 
   
