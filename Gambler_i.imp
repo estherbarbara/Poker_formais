@@ -5,6 +5,7 @@
 
 IMPLEMENTATION Gambler_i
 REFINES Gambler
+IMPORTS Rounds PROMOTES finishGame, stopGambleTime, startGambleTime
 
 CONCRETE_VARIABLES 
     playerOneTurn, playersInGame, 
