@@ -1,0 +1,134 @@
+/* Gambler_i
+ * Author: Esther
+ * Creation date: 16/06/2019
+ */
+
+IMPLEMENTATION Gambler_i
+REFINES Gambler
+
+CONCRETE_VARIABLES 
+    playerOneTurn, playersInGame, 
+    pool, first_player_raised_bet, bet_value_player_one, bet_value_player_two, actual_bet, first_round,
+    first_player_money, second_player_money
+    
+
+INITIALISATION 
+	playerOneTurn := YES;
+	playersInGame := {P_ONE, P_TWO};
+	pool := 0;
+	first_player_raised_bet := NO;
+	bet_value_player_one := 0;
+	bet_value_player_two := 0;
+	actual_bet := 5;
+	first_round := YES;
+	first_player_money := 100 ;
+	second_player_money := 100;
+	
+
+OPERATIONS
+  first_gamble =
+    BEGIN
+  	    pool := pool + actual_bet;
+      	IF playerOneTurn = YES
+      	THEN
+    		    first_player_money := first_player_money - actual_bet;
+    		    bet_value_player_one := bet_value_player_one + actual_bet;
+        		playerOneTurn := NO
+    	  ELSE
+    		    second_player_money := second_player_money - actual_bet;
+    		    bet_value_player_two := bet_value_player_two + actual_bet;
+    	    	playerOneTurn := YES
+    	END;
+    	first_round := NO;
+	END;
+
+
+  cover_bet =
+  BEGIN
+    IF playerOneTurn = YES
+    THEN
+        pool := pool + bet_value_player_two - bet_value_player_one;
+        first_player_money := first_player_money -  (bet_value_player_two - bet_value_player_one);
+        bet_value_player_one := bet_value_player_one + (bet_value_player_two - bet_value_player_one);
+        playerOneTurn := NO;
+    ELSE
+        pool := pool + bet_value_player_one - bet_value_player_two;
+        second_player_money := second_player_money - (bet_value_player_one - bet_value_player_two);
+        bet_value_player_two := bet_value_player_two + (bet_value_player_one - bet_value_player_two);
+        playerOneTurn := YES;
+    END;
+    stopGambleTime;
+    first_round := YES
+
+  END;
+
+
+  player_raise_bet = 
+  BEGIN
+  	actual_bet := actual_bet + 5;
+  	pool := pool;
+  	IF playerOneTurn = YES
+  	THEN
+		first_player_money := first_player_money - actual_bet;
+  		first_player_raised_bet := YES;
+		bet_value_player_one := bet_value_player_one + actual_bet;
+	    playerOneTurn := NO;
+	ELSE
+		second_player_money := second_player_money - actual_bet;
+  		first_player_raised_bet := NO;
+		bet_value_player_two := bet_value_player_two + actual_bet;
+	    playerOneTurn := YES;
+	END
+  END;
+
+
+  player_quit_game =
+  BEGIN
+	IF playerOneTurn = YES
+	THEN 
+		second_player_money := second_player_money + pool;
+		bet_value_player_one := 0;
+		bet_value_player_two := 0;
+		pool := 0;
+		playersInGame := playersInGame - {P_ONE};
+		playerOneTurn := NO;
+		finishGame;
+	ELSE
+		first_player_money := first_player_money + pool;
+		bet_value_player_one := 0;
+		bet_value_player_two := 0;
+		pool := 0;
+		playersInGame := playersInGame - {P_TWO};
+		playerOneTurn := YES;
+		finishGame
+	END;
+    first_round := YES
+  END;
+
+  
+  player_one_win_game =
+  BEGIN
+		playersInGame := playersInGame - {P_ONE};
+		first_player_money := first_player_money + pool;
+		bet_value_player_one := 0;
+		bet_value_player_two := 0;
+		playerOneTurn := NO;
+		pool := 0;
+		finishGame;
+		first_round := YES;
+  END;
+
+  
+  player_two_win_game =
+  BEGIN
+		playersInGame := playersInGame - {P_ONE};
+		second_player_money := second_player_money + pool;
+		bet_value_player_one := 0;
+		bet_value_player_two := 0;
+		playerOneTurn := NO;
+		pool := 0;
+		finishGame;
+		first_round := YES;
+  END
+
+ END

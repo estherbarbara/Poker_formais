@@ -1,0 +1,28 @@
+/* Rounds_i
+ * Author: Esther
+ * Creation date: 16/06/2019
+ */
+
+IMPLEMENTATION Rounds_i
+REFINES Rounds
+
+CONCRETE_VARIABLES
+    gambleTime, gameFinished
+
+
+INITIALISATION 
+	gambleTime := YES;
+	gameFinished := NO
+
+
+OPERATIONS
+	stopGambleTime = 
+		gambleTime:=NO;
+
+	startGambleTime = 
+		gambleTime:=YES;
+	
+	finishGame = 
+		gameFinished:=YES
+
+ END
