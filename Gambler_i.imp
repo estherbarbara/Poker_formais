@@ -8,14 +8,19 @@ REFINES Gambler
 IMPORTS Rounds PROMOTES finishGame, stopGambleTime, startGambleTime
 
 CONCRETE_VARIABLES 
-    playerOneTurn, playersInGame, 
+    playerOneTurn, playersInGame_i,
     pool, first_player_raised_bet, bet_value_player_one, bet_value_player_two, actual_bet, first_round,
-    first_player_money, second_player_money
+    first_player_money, second_player_money, gambleTime_i, gameFinished_i
     
-
+INVARIANT
+    playersInGame_i: INGAME --> BOOL
+    & card(playersInGame_i) = 2
+    & gambleTime_i : BOOLEAN
+    & gameFinished_i : BOOLEAN
+    
 INITIALISATION 
+    playersInGame_i := INGAME*{FALSE};
 	playerOneTurn := YES;
-	playersInGame := {P_ONE, P_TWO};
 	pool := 0;
 	first_player_raised_bet := NO;
 	bet_value_player_one := 0;
@@ -24,112 +29,149 @@ INITIALISATION
 	first_round := YES;
 	first_player_money := 100;
 	second_player_money := 100;
-	
+	gambleTime_i := YES;
+	gameFinished_i := NO
 
 OPERATIONS
   first_gamble =
     BEGIN
-  	    pool := pool + actual_bet;
-      	IF playerOneTurn = YES
-      	THEN
-    		    first_player_money := first_player_money - actual_bet;
-    		    bet_value_player_one := bet_value_player_one + actual_bet;
-        		playerOneTurn := NO;
-    	  ELSE
-    		    second_player_money := second_player_money - actual_bet;
-    		    bet_value_player_two := bet_value_player_two + actual_bet;
-    	    	playerOneTurn := YES;
-    	END;
-    	first_round := NO;
+    VAR aa, bb IN
+        aa:=playersInGame_i(P_ONE);
+        bb:=playersInGame_i(P_TWO);
+        IF first_round = YES & gambleTime_i = YES & gameFinished_i = NO & aa = TRUE & bb = TRUE
+        THEN
+  	        pool := pool + actual_bet;
+          	IF playerOneTurn = YES
+          	THEN
+        		    first_player_money := first_player_money - actual_bet;
+        		    bet_value_player_one := bet_value_player_one + actual_bet;
+            		playerOneTurn := NO
+        	  ELSE
+        		    second_player_money := second_player_money - actual_bet;
+        		    bet_value_player_two := bet_value_player_two + actual_bet;
+        	    	playerOneTurn := YES
+        	END;
+        	first_round := NO
+        END
+    END
 	END;
 
 
   cover_bet =
   BEGIN
-    IF playerOneTurn = YES
-    THEN
-        pool := pool + bet_value_player_two - bet_value_player_one;
-        first_player_money := first_player_money -  (bet_value_player_two - bet_value_player_one);
-        bet_value_player_one := bet_value_player_one + (bet_value_player_two - bet_value_player_one);
-        playerOneTurn := NO;
-    ELSE
-        pool := pool + bet_value_player_one - bet_value_player_two;
-        second_player_money := second_player_money - (bet_value_player_one - bet_value_player_two);
-        bet_value_player_two := bet_value_player_two + (bet_value_player_one - bet_value_player_two);
-        playerOneTurn := YES;
-    END;
-    stopGambleTime;
-    first_round := YES;
-
+    VAR aa, bb IN
+        aa:=playersInGame_i(P_ONE);
+        bb:=playersInGame_i(P_TWO);
+        IF first_round = NO & gambleTime_i = YES & gameFinished_i = NO & aa = TRUE & bb = TRUE
+        THEN
+            IF playerOneTurn = YES
+            THEN
+                pool := pool + bet_value_player_two - bet_value_player_one;
+                first_player_money := first_player_money -  (bet_value_player_two - bet_value_player_one);
+                bet_value_player_one := bet_value_player_one + (bet_value_player_two - bet_value_player_one);
+                playerOneTurn := NO
+            ELSE
+                pool := pool + bet_value_player_one - bet_value_player_two;
+                second_player_money := second_player_money - (bet_value_player_one - bet_value_player_two);
+                bet_value_player_two := bet_value_player_two + (bet_value_player_one - bet_value_player_two);
+                playerOneTurn := YES
+            END;
+            stopGambleTime;
+            first_round := YES
+        END
+    END
   END;
-
 
   player_raise_bet = 
   BEGIN
-  	actual_bet := actual_bet + 5;
-  	pool := pool;
-  	IF playerOneTurn = YES
-  	THEN
-		first_player_money := first_player_money - actual_bet;
-  		first_player_raised_bet := YES;
-		bet_value_player_one := bet_value_player_one + actual_bet;
-	    playerOneTurn := NO;
-	ELSE
-		second_player_money := second_player_money - actual_bet;
-  		first_player_raised_bet := NO;
-		bet_value_player_two := bet_value_player_two + actual_bet;
-	    playerOneTurn := YES;
-	END
+    VAR aa, bb IN
+        aa:=playersInGame_i(P_ONE);
+        bb:=playersInGame_i(P_TWO);
+      IF first_round = NO & gambleTime_i = YES & gameFinished_i = NO & aa = TRUE & bb = TRUE
+      THEN 
+      	actual_bet := actual_bet + 5;
+      	pool := pool;
+      	IF playerOneTurn = YES
+      	THEN
+    		first_player_money := first_player_money - actual_bet;
+      		first_player_raised_bet := YES;
+    		bet_value_player_one := bet_value_player_one + actual_bet;
+    	    playerOneTurn := NO
+    	ELSE
+    		second_player_money := second_player_money - actual_bet;
+      		first_player_raised_bet := NO;
+    		bet_value_player_two := bet_value_player_two + actual_bet;
+    	    playerOneTurn := YES
+    	END
+      END
+    END
   END;
-
 
   player_quit_game =
   BEGIN
-	IF playerOneTurn = YES
-	THEN 
-		second_player_money := second_player_money + pool;
-		bet_value_player_one := 0;
-		bet_value_player_two := 0;
-		pool := 0;
-		playersInGame := playersInGame - {P_ONE};
-		playerOneTurn := NO;
-		finishGame;
-	ELSE
-		first_player_money := first_player_money + pool;
-		bet_value_player_one := 0;
-		bet_value_player_two := 0;
-		pool := 0;
-		playersInGame := playersInGame - {P_TWO};
-		playerOneTurn := YES;
-		finishGame;
-	END;
-    first_round := YES;
+    VAR aa, bb IN
+        aa:=playersInGame_i(P_ONE);
+        bb:=playersInGame_i(P_TWO);
+        IF gambleTime_i = YES & gameFinished_i = NO & aa = TRUE & bb = TRUE
+        THEN
+    	    IF playerOneTurn = YES
+        	THEN 
+        		second_player_money := second_player_money + pool;
+        		bet_value_player_one := 0;
+        		bet_value_player_two := 0;
+        		pool := 0;
+                playersInGame_i(P_ONE) := FALSE;
+        		playerOneTurn := NO;
+        		gameFinished_i := YES
+        	ELSE
+        		first_player_money := first_player_money + pool;
+        		bet_value_player_one := 0;
+        		bet_value_player_two := 0;
+        		pool := 0;
+                playersInGame_i(P_TWO) := FALSE;
+        		playerOneTurn := YES;
+        		gameFinished_i := YES
+        	END;
+            first_round := YES
+        END
+     END
   END;
-
   
   player_one_win_game =
   BEGIN
-		playersInGame := playersInGame - {P_ONE};
+    VAR aa IN
+        aa:=playersInGame_i(P_ONE);
+      IF gameFinished_i = NO & aa = TRUE
+      THEN
+        playersInGame_i(P_ONE) := FALSE;
 		first_player_money := first_player_money + pool;
 		bet_value_player_one := 0;
 		bet_value_player_two := 0;
 		playerOneTurn := NO;
 		pool := 0;
-		finishGame;
-		first_round := YES;
+   		gameFinished_i := YES;
+		first_round := YES
+	  END
+	END
   END;
 
   
   player_two_win_game =
   BEGIN
-		playersInGame := playersInGame - {P_ONE};
+    VAR aa IN
+        aa:=playersInGame_i(P_TWO);
+      IF gameFinished_i = NO & aa = TRUE
+      THEN
+        playersInGame_i(P_TWO) := FALSE;
 		second_player_money := second_player_money + pool;
 		bet_value_player_one := 0;
 		bet_value_player_two := 0;
 		playerOneTurn := NO;
 		pool := 0;
-		finishGame;
-		first_round := YES;
+   		gameFinished_i := YES;
+		first_round := YES
+      END
+    END
   END
 
  END

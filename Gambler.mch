@@ -95,7 +95,7 @@ OPERATIONS
   END;
 
   player_quit_game =
-  PRE gambleTime = YES & gameFinished = NO & card(playersInGame) > 1 & {P_ONE} <: playersInGame
+  PRE gambleTime = YES & gameFinished = NO & card(playersInGame) > 1
   THEN
 	IF playerOneTurn = YES
 	THEN 

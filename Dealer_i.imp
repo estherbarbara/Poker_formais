@@ -1,0 +1,89 @@
+/* Dealer_i
+ * Author: Esther
+ * Creation date: 16/06/2019
+ */
+
+IMPLEMENTATION Dealer_i
+REFINES Dealer
+IMPORTS Gambler PROMOTES finishGame, stopGambleTime, startGambleTime, 
+    player_one_win_game, player_two_win_game, 
+    first_gamble, cover_bet, player_quit_game, player_raise_bet
+
+CONCRETE_VARIABLES
+    playable_deck_i, comunity_cards_i, player_one_cards_i, player_two_cards_i
+    
+INVARIANT
+    playable_deck_i: (DECK*SUITS) --> BOOL 
+    & comunity_cards_i : (DECK*SUITS) --> BOOL 
+    & player_one_cards_i : (DECK*SUITS) --> BOOL 
+    & player_two_cards_i : (DECK*SUITS) --> BOOL 
+    & card(playable_deck_i) = 52
+    & card(comunity_cards_i) <= 5
+    & card(player_one_cards_i) <= 2
+    & card(player_two_cards_i) <= 2
+    
+INITIALISATION 
+    playable_deck_i := (DECK*SUITS)*{FALSE};
+    comunity_cards_i := {};
+    player_one_cards_i := {};
+    player_two_cards_i := {}
+    
+OPERATIONS
+  deal_comunity_cards =
+  BEGIN
+      comunity_cards_i(ACE,SPADES) := TRUE;
+      comunity_cards_i(ACE,HEARTS) := TRUE;
+      comunity_cards_i(ACE,DIAMONDS) := TRUE;
+      playable_deck_i(ACE,SPADES) := FALSE;
+      playable_deck_i(ACE,HEARTS) := FALSE;
+      playable_deck_i(ACE,DIAMONDS) := FALSE;
+      startGambleTime
+  END;
+
+  deal_one_comunity_card =
+  BEGIN 
+          player_one_cards_i(ACE,HEARTS) := TRUE;
+          playable_deck_i(TWO,CLUBS) := FALSE;
+           
+           VAR xx, yy IN 
+            xx := FALSE;
+            yy := 1;
+            CASE yy OF //card(comunity_cards_i) = 4 //Theres still one gambling round left
+                EITHER 1, 2, 3
+                THEN
+                    xx := TRUE
+                END
+            END;
+    
+            IF (xx=TRUE) 
+            THEN 
+                startGambleTime
+            END
+           END
+  END;
+  
+  deal_two_cards_to_two_players =
+  BEGIN 
+      player_one_cards_i(TWO,CLUBS) := TRUE;
+      player_one_cards_i(TWO,HEARTS) := TRUE;
+      player_two_cards_i(ACE,CLUBS) := TRUE;
+      player_two_cards_i(TWO,CLUBS) := TRUE;
+      playable_deck_i(ACE,HEARTS) := FALSE;
+      playable_deck_i(TWO,HEARTS) := FALSE;
+      playable_deck_i(ACE,CLUBS) := FALSE;
+      playable_deck_i(TWO,CLUBS) := FALSE;
+      
+      startGambleTime
+  END;
+
+/****** combos ******/
+  	ww <-- royal_flush_winner =
+  	BEGIN
+			ww:=P_NONE
+    END;
+
+	ww <-- quadra_winner =
+	BEGIN
+		ww:=P_NONE
+	END
+ END

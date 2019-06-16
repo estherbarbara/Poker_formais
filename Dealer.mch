@@ -7,10 +7,14 @@ EXTENDS Gambler
 VARIABLES
     playable_deck, comunity_cards, player_one_cards, player_two_cards, royal_flush
     
-INVARIANT         
-    playable_deck <: DECK*SUITS
+INVARIANT      
+    playable_deck : DECK <-> SUITS
+    & playable_deck <: DECK*SUITS
+    & comunity_cards : DECK <-> SUITS
     & comunity_cards <: DECK*SUITS 
+    & player_one_cards : DECK <-> SUITS
     & player_one_cards <: DECK*SUITS 
+    & player_two_cards : DECK <-> SUITS
     & player_two_cards <: DECK*SUITS 
     & card( comunity_cards ) <= 5
     & card( player_one_cards ) <= 2
