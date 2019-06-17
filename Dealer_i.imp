@@ -24,9 +24,15 @@ INVARIANT
     
 INITIALISATION 
     playable_deck_i := (DECK*SUITS)*{FALSE};
-    comunity_cards_i := {};
-    player_one_cards_i := {};
-    player_two_cards_i := {}
+    comunity_cards_i(ACE,SPADES) := FALSE;
+      comunity_cards_i(ACE,HEARTS) := FALSE;
+      comunity_cards_i(ACE,DIAMONDS) := FALSE;
+      comunity_cards_i(TWO,HEARTS) := FALSE;
+      comunity_cards_i(THREE,CLUBS) := FALSE;
+      player_one_cards_i(TWO,CLUBS) := FALSE;
+      player_one_cards_i(THREE,HEARTS) := FALSE;
+      player_two_cards_i(ACE,CLUBS) := FALSE;
+      player_two_cards_i(TWO,CLUBS) := FALSE
     
 OPERATIONS
   deal_comunity_cards =
@@ -37,39 +43,32 @@ OPERATIONS
       playable_deck_i(ACE,SPADES) := FALSE;
       playable_deck_i(ACE,HEARTS) := FALSE;
       playable_deck_i(ACE,DIAMONDS) := FALSE;
+      
       startGambleTime
   END;
 
-  deal_one_comunity_card =
+  deal_first_comunity_card =
   BEGIN 
-          player_one_cards_i(ACE,HEARTS) := TRUE;
-          playable_deck_i(TWO,CLUBS) := FALSE;
-           
-           VAR xx, yy IN 
-            xx := FALSE;
-            yy := 1;
-            CASE yy OF //card(comunity_cards_i) = 4 //Theres still one gambling round left
-                EITHER 1, 2, 3
-                THEN
-                    xx := TRUE
-                END
-            END;
-    
-            IF (xx=TRUE) 
-            THEN 
-                startGambleTime
-            END
-           END
+          comunity_cards_i(TWO,HEARTS) := TRUE;
+          playable_deck_i(TWO,HEARTS) := FALSE;
+          
+          startGambleTime
+  END;
+  
+  deal_last_comunity_card =
+  BEGIN 
+          comunity_cards_i(THREE,CLUBS) := TRUE;
+          playable_deck_i(THREE,CLUBS) := FALSE
   END;
   
   deal_two_cards_to_two_players =
   BEGIN 
       player_one_cards_i(TWO,CLUBS) := TRUE;
-      player_one_cards_i(TWO,HEARTS) := TRUE;
+      player_one_cards_i(THREE,HEARTS) := TRUE;
       player_two_cards_i(ACE,CLUBS) := TRUE;
       player_two_cards_i(TWO,CLUBS) := TRUE;
-      playable_deck_i(ACE,HEARTS) := FALSE;
-      playable_deck_i(TWO,HEARTS) := FALSE;
+      playable_deck_i(TWO,CLUBS) := FALSE;
+      playable_deck_i(THREE,HEARTS) := FALSE;
       playable_deck_i(ACE,CLUBS) := FALSE;
       playable_deck_i(TWO,CLUBS) := FALSE;
       

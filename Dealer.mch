@@ -50,19 +50,8 @@ OPERATIONS
       	||
       	startGambleTime
   END;
-  
-  /*
-  deal_comunity_cards_robado =
-  PRE gambleTime = NO & 
-    card( playable_deck ) > 3 & card( comunity_cards ) = 0
-  THEN 	
-  	playable_deck := playable_deck - {ACE}*{SPADES, HEARTS, DIAMONDS} ||
-  	comunity_cards := comunity_cards \/ {ACE}*{SPADES, HEARTS, DIAMONDS} ||
-    gambleTime := YES
-  END;
-  */
 
-  deal_one_comunity_card =
+  deal_first_comunity_card =
   PRE gambleTime = NO & 
 	card(comunity_cards) >=3 & card(comunity_cards) <= 4 & 
 	card( player_one_cards ) > 0 & card( player_two_cards ) > 0 & 
@@ -78,18 +67,20 @@ OPERATIONS
       END
   END;
   
-  /*
-  deal_two_cards_to_two_players_robado =
-  PRE gambleTime = NO & card( player_one_cards ) = 0 & card( player_two_cards ) = 0 & card(playable_deck)>=4 & card(comunity_cards) = 3
+  deal_last_comunity_card =
+  PRE gambleTime = NO &  
+	card(comunity_cards) >=3 & card(comunity_cards) <= 4 & 
+	card( player_one_cards ) > 0 & card( player_two_cards ) > 0 & 
+	card(playable_deck) >= 1
   THEN 
-  	playable_deck := playable_deck - {ACE}*{CLUBS} ||
-  	player_one_cards := player_one_cards \/ {ACE}*{HEARTS} \/ {TWO}*{HEARTS} ||
-  	player_two_cards := player_two_cards \/ {ACE}*{CLUBS} \/ {TWO}*{HEARTS} ||
-    gambleTime := YES
+      ANY xx
+      WHERE xx:DECK*SUITS & {xx} <: playable_deck
+      THEN playable_deck := playable_deck - {xx} ||
+          comunity_cards := comunity_cards \/ {xx}
+      END
   END;
-  */
 
-   deal_two_cards_to_two_players =
+  deal_two_cards_to_two_players =
   PRE gambleTime = NO & card( player_one_cards ) = 0 & card( player_two_cards ) = 0 & card(playable_deck)>=4 & card(comunity_cards) = 3
   THEN 
       ANY xx, yy, zz, kk
@@ -101,10 +92,12 @@ OPERATIONS
       END ||
       startGambleTime
   END;
+  
 /****** end dealer ******/
 
 
 /****** combos ******/
+
   	ww <-- royal_flush_winner =
   	PRE ww:INGAME & card( player_one_cards ) = 2 & card( player_two_cards ) = 2 & card( comunity_cards ) = 5
   	THEN 
@@ -168,22 +161,8 @@ OPERATIONS
 			END
 		END
 	END
+
 /****** end combos ******/
 
-/****** values ******/
-/*
-  aa <-- cardinalidade_deck = 
-    aa := card( playable_deck );
-
-  aa <-- cardinalidade_comunity = 
-    aa := card( comunity_cards );
-
-  aa <-- cardinalidade_player_one = 
-    aa := card( player_one_cards );
-
-  aa <-- cardinalidade_player_two = 
-    aa := card( player_two_cards )
-*/
-/****** end values ******/
 
 END

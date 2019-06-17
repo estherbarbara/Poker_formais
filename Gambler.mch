@@ -38,35 +38,46 @@ INITIALISATION
 	
 OPERATIONS
 
-  first_gamble =
+  total, left_one, left_two <-- first_gamble =
   PRE first_round = YES & gambleTime = YES & gameFinished = NO &  card(playersInGame) > 1
   THEN
   	pool := pool + actual_bet ||
+  	total := pool + actual_bet ||
   	IF playerOneTurn = YES
   	THEN
 		    first_player_money := first_player_money - actual_bet ||
+		    left_one := first_player_money - actual_bet ||
+		    left_two := second_player_money ||
 		    bet_value_player_one := bet_value_player_one + actual_bet ||
     		playerOneTurn := NO
 	  ELSE
 		    second_player_money := second_player_money - actual_bet ||
+		    left_two := second_player_money - actual_bet ||
+		    left_one := first_player_money ||
 		    bet_value_player_two := bet_value_player_two + actual_bet ||
 	    	playerOneTurn := YES
 	END ||
 	first_round := NO
   END;
 
-  cover_bet =
+  total, left_one, left_two <-- cover_bet =
   PRE first_round = NO & gambleTime = YES & gameFinished = NO &  card(playersInGame) > 1
   THEN
     IF playerOneTurn = YES
     THEN
         pool := pool + bet_value_player_two - bet_value_player_one ||
+        total := pool + bet_value_player_two - bet_value_player_one ||
         first_player_money := first_player_money -  (bet_value_player_two - bet_value_player_one) ||
+        left_two := second_player_money ||
+        left_one := first_player_money -  (bet_value_player_two - bet_value_player_one) ||
         bet_value_player_one := bet_value_player_one + (bet_value_player_two - bet_value_player_one) ||
         playerOneTurn := NO
     ELSE
         pool := pool + bet_value_player_one - bet_value_player_two ||
+        total := pool + bet_value_player_one - bet_value_player_two ||
         second_player_money := second_player_money - (bet_value_player_one - bet_value_player_two) ||
+        left_one := first_player_money ||
+        left_two := second_player_money - (bet_value_player_one - bet_value_player_two) ||
         bet_value_player_two := bet_value_player_two + (bet_value_player_one - bet_value_player_two) ||
         playerOneTurn := YES
     END ||
@@ -75,31 +86,39 @@ OPERATIONS
 
   END;
 
-  player_raise_bet = 
+  total, left_one, left_two <-- player_raise_bet = 
   PRE first_round = NO & gambleTime = YES & gameFinished = NO  & card(playersInGame) > 1
   THEN
   	actual_bet := actual_bet + 5 ||
   	pool := pool + actual_bet + 5 ||
+  	total := pool + actual_bet + 5 ||
   	IF playerOneTurn = YES
   	THEN
 		first_player_money := first_player_money - (actual_bet +5) ||
   		first_player_raised_bet := YES ||
 		bet_value_player_one := bet_value_player_one + actual_bet + 5 ||
+		left_one := first_player_money - (actual_bet +5) ||
+		left_two := second_player_money ||
 	    playerOneTurn := NO
 	ELSE
 		second_player_money := second_player_money - (actual_bet + 5) ||
   		first_player_raised_bet := NO ||
 		bet_value_player_two := bet_value_player_two + actual_bet + 5 ||
+		left_one := second_player_money - (actual_bet +5) ||
+		left_two := first_player_money ||
 	    playerOneTurn := YES
 	END
   END;
 
-  player_quit_game =
+  total, left_one, left_two <-- player_quit_game =
   PRE gambleTime = YES & gameFinished = NO & card(playersInGame) > 1
   THEN
 	IF playerOneTurn = YES
 	THEN 
 		second_player_money := second_player_money + pool ||
+		left_one := first_player_money ||
+		left_two := second_player_money + pool ||
+		
 		bet_value_player_one := 0 ||
 		bet_value_player_two := 0 ||
 		pool := 0 ||
@@ -108,6 +127,9 @@ OPERATIONS
 		finishGame
 	ELSE
 		first_player_money := first_player_money + pool ||
+		left_one := first_player_money + pool ||
+		left_two := second_player_money ||
+		
 		bet_value_player_one := 0 ||
 		bet_value_player_two := 0 ||
 		pool := 0 ||
@@ -115,10 +137,11 @@ OPERATIONS
 		playerOneTurn := YES ||
 		finishGame
 	END ||
+	total := 0 ||
     first_round := YES
   END;
   
-  player_one_win_game =
+  total, left_one, left_two <-- player_one_win_game =
   PRE gameFinished = NO & card(playersInGame) > 1 & {P_ONE} <: playersInGame
   THEN
 		playersInGame := playersInGame - {P_ONE} ||
@@ -128,10 +151,14 @@ OPERATIONS
 		playerOneTurn := NO ||
 		pool := 0 ||
 		finishGame ||
-		first_round := YES
+		first_round := YES ||
+		total := 0 ||
+		left_one := first_player_money + pool ||
+		left_two := second_player_money
+		
   END;
   
-  player_two_win_game =
+  total, left_one, left_two <-- player_two_win_game =
   PRE gameFinished = NO & card(playersInGame) > 1 & {P_TWO} <: playersInGame
   THEN
 		playersInGame := playersInGame - {P_ONE} ||
@@ -141,7 +168,11 @@ OPERATIONS
 		playerOneTurn := NO ||
 		pool := 0 ||
 		finishGame ||
-		first_round := YES
+		first_round := YES ||
+		total := 0 ||
+		left_one := first_player_money ||
+		left_two := second_player_money + pool
+		
   END
 
 END
